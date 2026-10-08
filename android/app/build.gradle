@@ -4,6 +4,18 @@ plugins {
     id 'dev.flutter.flutter-gradle-plugin'
 }
 
+def releaseKeystorePath = System.getenv('RECEIPTWISE_KEYSTORE_PATH')
+def releaseKeyAlias = System.getenv('RECEIPTWISE_KEY_ALIAS')
+def releaseKeystorePassword = System.getenv('RECEIPTWISE_KEYSTORE_PASSWORD')
+def releaseKeyPassword = System.getenv('RECEIPTWISE_KEY_PASSWORD')
+def releaseSigningReady = [
+    releaseKeystorePath,
+    releaseKeyAlias,
+    releaseKeystorePassword,
+    releaseKeyPassword,
+].every { value -> value != null && !value.trim().isEmpty() } &&
+    file(releaseKeystorePath ?: '').isFile()
+
 android {
     namespace 'com.vku.receiptwise'
     compileSdk flutter.compileSdkVersion
@@ -23,8 +35,27 @@ android {
     }
     kotlinOptions { jvmTarget = '17' }
 
-    buildTypes {
+    signingConfigs {
+        // Android Gradle Plugin provisions ~/.android/debug.keystore automatically.
+        debug { }
         release {
+            if (releaseSigningReady) {
+                storeFile file(releaseKeystorePath)
+                storePassword releaseKeystorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            if (releaseSigningReady) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled false
             shrinkResources false
         }
@@ -32,3 +63,19 @@ android {
 }
 
 flutter { source '../..' }
+
+def validateReleaseSigning = tasks.register('validateReleaseSigning') {
+    doLast {
+        if (!releaseSigningReady) {
+            throw new GradleException(
+                'Release signing is not configured. Set RECEIPTWISE_KEYSTORE_PATH, '
+                    + 'RECEIPTWISE_KEY_ALIAS, RECEIPTWISE_KEYSTORE_PASSWORD and '
+                    + 'RECEIPTWISE_KEY_PASSWORD before building release.'
+            )
+        }
+    }
+}
+
+tasks.matching { task -> task.name == 'assembleRelease' }.configureEach {
+    dependsOn(validateReleaseSigning)
+}

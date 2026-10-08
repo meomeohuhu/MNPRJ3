@@ -11,7 +11,8 @@
 ReceiptWise là ứng dụng Flutter Android offline-first cho phép chụp/chọn hóa đơn, crop ảnh, nhận diện chữ bằng Google ML Kit on-device, phân tích total/date/merchant bằng Regex + heuristic, review trước khi lưu SQLite và xem analytics bằng CustomPainter.
 
 - Repository: [GitHub MNPRJ3](https://github.com/meomeohuhu/MNPRJ3), branch `main` chứa source ReceiptWise.
-- APK: đã build thành công bản release arm64 tại `build/app/outputs/flutter-apk/app-release.apk` (54.1 MB). SHA-256: `696AE1128493B781FAA1F1AFDF6E7E5C7676A335CE21A12D29408A604B13363A`. APK chưa upload GitHub Release vì chưa cấu hình GitHub CLI/token.
+- APK debug: đã build thành công tại `build/app/outputs/flutter-apk/app-debug.apk` (114.3 MB), SHA-256 `DF4797C670E1250932A088DB13C4D9CEC9E9F747014F09979943355ED2F4804C`.
+- APK release arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-release.apk` (54.1 MB), SHA-256 `547376461FACCC4AA8F7CCE1CEE37E628031BB2315B111BF1B20ACE24662B898`. Cả hai APK đã được `apksigner verify --verbose --print-certs` xác nhận với APK Signature Scheme v2 và 1 signer RSA 2048-bit. APK chưa upload GitHub Release vì chưa cấu hình GitHub CLI/token.
 - Render static site: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com), deploy từ branch `main` bằng `render.yaml`. Kiểm tra HTTP thực tế trả status 200 và title ReceiptWise.
 - Video: chưa quay; kịch bản thực tế tại `docs/video-script.md`.
 
@@ -44,4 +45,5 @@ Luồng chính: Camera/Gallery → Crop → OcrService → ReceiptParserService 
 - **Nhiều số tiền trên hóa đơn:** parser chấm điểm keyword thanh toán, giảm điểm VAT/discount/change/unit price và đánh dấu `totalAmount` chưa chắc chắn khi candidate gần nhau.
 - **Dữ liệu phải tồn tại sau restart:** dùng SQLite và copy ảnh sang application documents, không giữ đường dẫn temporary cache.
 - **Không dùng chart library:** donut và weekly bar được viết bằng Canvas/CustomPainter, có animation và hit testing.
-- **Giới hạn môi trường:** đã cài Flutter 3.47.6/Dart 3.13.5, Android toolchain và xác minh `flutter analyze`, `flutter test`, `flutter build apk --release --target-platform android-arm64`. Chưa kiểm thử trực tiếp camera/OCR/SQLite persistence trên thiết bị thật vì chưa có Android device/emulator kết nối.
+- **Lỗi APK không có chữ ký:** cấu hình release trước đây không gán `signingConfig`, nên APK release cũ không có signature block và Android báo `APK contains no signature files`. Đã cấu hình debug signing mặc định và release signing qua biến môi trường, đồng thời thêm task validation để chặn release unsigned.
+- **Giới hạn môi trường:** đã cài Flutter 3.47.6/Dart 3.13.5, Android toolchain và xác minh `flutter clean`, `flutter pub get`, `flutter analyze`, `flutter test`, build debug/release và chữ ký APK. Chưa kiểm thử trực tiếp camera/OCR/SQLite persistence trên thiết bị thật vì chưa có Android device/emulator kết nối.

@@ -47,6 +47,22 @@ Trong môi trường máy phát triển ít RAM, có thể dùng bản Android p
 flutter build apk --release --target-platform android-arm64
 ```
 
+### Android signing
+
+APK debug dùng debug keystore do Android Gradle Plugin tự quản lý. APK release yêu cầu
+keystore riêng qua biến môi trường; mật khẩu và keystore không được lưu trong Git:
+
+```powershell
+$env:RECEIPTWISE_KEYSTORE_PATH = 'C:\private\receiptwise-release.jks'
+$env:RECEIPTWISE_KEY_ALIAS = 'receiptwise_release'
+$env:RECEIPTWISE_KEYSTORE_PASSWORD = '<your-local-password>'
+$env:RECEIPTWISE_KEY_PASSWORD = '<your-local-password>'
+flutter build apk --release --target-platform android-arm64
+```
+
+Build release sẽ dừng với lỗi rõ ràng nếu thiếu signing configuration, nhằm tránh tạo APK
+không có chữ ký. Không commit keystore hoặc password vào repository.
+
 ## Test OCR offline
 
 1. Mở Quét hóa đơn.
