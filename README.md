@@ -54,7 +54,7 @@ Không có Firebase, cloud OCR, backend hay API key trong dự án.
 
 ## Render static site
 
-Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `render.yaml`. Link APK/GitHub/Video đang để trạng thái chưa cấu hình vì chưa có release URL hoặc video thực tế; không sử dụng URL giả.
+Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `render.yaml`. Demo live: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com). Link APK và Video vẫn để trạng thái chưa cấu hình vì chưa có release/video thực tế.
 
 ## Repository
 
