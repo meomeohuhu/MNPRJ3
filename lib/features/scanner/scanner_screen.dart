@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:camera/camera.dart';
@@ -22,6 +23,7 @@ class _ScannerScreenState extends State<ScannerScreen>
   bool flashOn = false;
   bool loading = true;
   bool processing = false;
+  bool initializing = false;
   String? error;
   List<CameraDescription> cameras = [];
   final picker = ImagePicker();
@@ -44,36 +46,58 @@ class _ScannerScreenState extends State<ScannerScreen>
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (controller == null || !controller!.value.isInitialized) return;
-    if (state == AppLifecycleState.inactive) {
-      controller?.dispose();
-    } else if (state == AppLifecycleState.resumed) {
-      _initialize();
+    if (state == AppLifecycleState.inactive ||
+        state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden) {
+      unawaited(_pauseCamera());
+    } else if (state == AppLifecycleState.resumed && !processing) {
+      unawaited(_initialize());
     }
   }
 
   Future<void> _initialize() async {
+    if (!mounted || initializing || processing) return;
+    initializing = true;
     setState(() {
       loading = true;
       error = null;
     });
+    CameraController? next;
     try {
       cameras = await availableCameras();
       if (cameras.isEmpty) throw StateError('Thiết bị không có camera');
       final selected = cameras.firstWhere(
           (camera) => camera.lensDirection == CameraLensDirection.back,
           orElse: () => cameras.first);
-      final next = CameraController(selected, ResolutionPreset.high,
+      next = CameraController(selected, ResolutionPreset.high,
           enableAudio: false, imageFormatGroup: ImageFormatGroup.jpeg);
       await next.initialize();
-      await controller?.dispose();
+      if (!mounted) {
+        await next.dispose();
+        return;
+      }
+      final previous = controller;
       controller = next;
+      next = null;
+      await previous?.dispose();
     } catch (e) {
-      error =
-          'Không thể mở camera. Hãy cấp quyền Camera hoặc chọn ảnh từ thư viện.';
+      await next?.dispose();
+      if (mounted) {
+        error =
+            'Không thể mở camera. Hãy cấp quyền Camera hoặc chọn ảnh từ thư viện.';
+      }
     } finally {
+      initializing = false;
       if (mounted) setState(() => loading = false);
     }
+  }
+
+  Future<void> _pauseCamera() async {
+    final current = controller;
+    controller = null;
+    flashOn = false;
+    if (mounted) setState(() {});
+    await current?.dispose();
   }
 
   Future<void> _capture() async {
@@ -86,25 +110,39 @@ class _ScannerScreenState extends State<ScannerScreen>
     } catch (e) {
       if (mounted) _showError('Chụp ảnh thất bại: $e');
     } finally {
-      if (mounted) setState(() => processing = false);
+      if (mounted) {
+        setState(() => processing = false);
+        if (controller == null) {
+          unawaited(_initialize());
+        }
+      }
     }
   }
 
   Future<void> _pickFromGallery() async {
-    final photo =
-        await picker.pickImage(source: ImageSource.gallery, imageQuality: 95);
-    if (photo == null || processing) return;
+    if (processing) return;
     setState(() => processing = true);
     try {
+      final photo =
+          await picker.pickImage(source: ImageSource.gallery, imageQuality: 95);
+      if (photo == null) return;
       await _process(File(photo.path));
     } catch (e) {
       if (mounted) _showError('Không thể xử lý ảnh: $e');
     } finally {
-      if (mounted) setState(() => processing = false);
+      if (mounted) {
+        setState(() => processing = false);
+        if (controller == null) {
+          unawaited(_initialize());
+        }
+      }
     }
   }
 
   Future<void> _process(File source) async {
+    if (!await source.exists()) {
+      throw const FileSystemException('Ảnh đã chọn không tồn tại');
+    }
     final cropped =
         await ImageCropper().cropImage(sourcePath: source.path, uiSettings: [
       AndroidUiSettings(
@@ -166,11 +204,23 @@ class _ScannerScreenState extends State<ScannerScreen>
                           onPressed: controller == null
                               ? null
                               : () async {
-                                  flashOn = !flashOn;
-                                  await controller!.setFlashMode(flashOn
-                                      ? FlashMode.torch
-                                      : FlashMode.off);
-                                  setState(() {});
+                                  final current = controller;
+                                  if (current == null ||
+                                      !current.value.isInitialized) {
+                                    return;
+                                  }
+                                  try {
+                                    flashOn = !flashOn;
+                                    await current.setFlashMode(flashOn
+                                        ? FlashMode.torch
+                                        : FlashMode.off);
+                                    if (mounted) setState(() {});
+                                  } catch (e) {
+                                    if (mounted) {
+                                      _showError(
+                                          'Thiết bị không hỗ trợ đèn flash.');
+                                    }
+                                  }
                                 },
                           icon: Icon(
                               flashOn

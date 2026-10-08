@@ -8,6 +8,7 @@ ReceiptWise là ứng dụng Flutter Android giúp chụp hóa đơn, nhận di�
 
 - Dashboard tổng chi tiêu tháng/tuần, số hóa đơn và giao dịch gần đây.
 - Camera preview, flash, tap-to-focus, chọn ảnh từ gallery và crop ảnh thật.
+- Android manifest đã khai báo `UCropActivity` để luồng crop không bị crash khi chụp/chọn ảnh.
 - OCR offline với `google_mlkit_text_recognition`.
 - Receipt parser thuần Dart: định dạng tiền Việt, keyword total, ngày và merchant có điểm tin cậy.
 - Review bắt buộc trước khi lưu, cho phép sửa trường OCR không chắc chắn.
