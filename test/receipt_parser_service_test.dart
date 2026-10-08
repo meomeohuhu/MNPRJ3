@@ -5,18 +5,22 @@ void main() {
   final parser = ReceiptParserService();
 
   test('parses Vietnamese grouped amount and date', () {
-    final result = parser.parse('WINMART\nNgày: 08/10/2026\nTỔNG THANH TOÁN: 150.000đ');
+    final result =
+        parser.parse('WINMART\nNgày: 08/10/2026\nTỔNG THANH TOÁN: 150.000đ');
     expect(result.totalAmount, 150000);
     expect(result.transactionDate, DateTime(2026, 10, 8));
   });
 
   test('parses comma VND and prefers payment total over product lines', () {
-    final result = parser.parse('COOPMART\nSỮA 150,000 VND\nGIẢM GIÁ -10,000\nTOTAL 140,000 VND\nTIỀN THỪA 60,000');
+    final result = parser.parse(
+        'COOPMART\nSỮA 150,000 VND\nGIẢM GIÁ -10,000\nTOTAL 140,000 VND\nTIỀN THỪA 60,000');
     expect(result.totalAmount, 140000);
   });
 
-  test('does not choose change or VAT as total when payment keyword exists', () {
-    final result = parser.parse('MINI MART\nVAT 8% 12.000đ\nAMOUNT DUE 162.000 VNĐ\nTIỀN THỪA 38.000đ');
+  test('does not choose change or VAT as total when payment keyword exists',
+      () {
+    final result = parser.parse(
+        'MINI MART\nVAT 8% 12.000đ\nAMOUNT DUE 162.000 VNĐ\nTIỀN THỪA 38.000đ');
     expect(result.totalAmount, 162000);
   });
 

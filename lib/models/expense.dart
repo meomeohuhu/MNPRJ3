@@ -37,7 +37,8 @@ class Expense {
     String? rawOcrText,
     DateTime? createdAt,
     DateTime? updatedAt,
-  }) => Expense(
+  }) =>
+      Expense(
         id: id ?? this.id,
         merchantName: merchantName ?? this.merchantName,
         amount: amount ?? this.amount,

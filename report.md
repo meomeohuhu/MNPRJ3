@@ -11,7 +11,7 @@
 ReceiptWise là ứng dụng Flutter Android offline-first cho phép chụp/chọn hóa đơn, crop ảnh, nhận diện chữ bằng Google ML Kit on-device, phân tích total/date/merchant bằng Regex + heuristic, review trước khi lưu SQLite và xem analytics bằng CustomPainter.
 
 - Repository: [GitHub MNPRJ3](https://github.com/meomeohuhu/MNPRJ3), branch `main` chứa source ReceiptWise.
-- APK: chưa build được trong môi trường hiện tại vì Flutter SDK chưa được cài/đưa vào PATH.
+- APK: đã build thành công bản release arm64 tại `build/app/outputs/flutter-apk/app-release.apk` (54.1 MB). SHA-256: `696AE1128493B781FAA1F1AFDF6E7E5C7676A335CE21A12D29408A604B13363A`. APK chưa upload GitHub Release vì chưa cấu hình GitHub CLI/token.
 - Render static site: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com), deploy từ branch `main` bằng `render.yaml`. Kiểm tra HTTP thực tế trả status 200 và title ReceiptWise.
 - Video: chưa quay; kịch bản thực tế tại `docs/video-script.md`.
 
@@ -36,7 +36,7 @@ Luồng chính: Camera/Gallery → Crop → OcrService → ReceiptParserService 
 
 ## 4. Empirical Evidence & Screenshots
 
-Ảnh chụp thực tế chưa được tạo vì môi trường không có Flutter SDK/device ở thời điểm chuẩn bị source. Khi có Android device, cần chèn 3–4 ảnh không chỉnh sửa vào phần này: Dashboard, Scanner frame, Review sau OCR và Analytics/History sau khi restart. Không sử dụng ảnh giả làm bằng chứng.
+Ảnh chụp thực tế chưa được tạo vì môi trường hiện tại không có Android device/emulator kết nối. Khi có thiết bị, cần chèn 3–4 ảnh không chỉnh sửa: Dashboard, Scanner frame, Review sau OCR và Analytics/History sau khi restart. Không sử dụng ảnh giả làm bằng chứng.
 
 ## 5. Technical Challenges & Resolutions
 
@@ -44,4 +44,4 @@ Luồng chính: Camera/Gallery → Crop → OcrService → ReceiptParserService 
 - **Nhiều số tiền trên hóa đơn:** parser chấm điểm keyword thanh toán, giảm điểm VAT/discount/change/unit price và đánh dấu `totalAmount` chưa chắc chắn khi candidate gần nhau.
 - **Dữ liệu phải tồn tại sau restart:** dùng SQLite và copy ảnh sang application documents, không giữ đường dẫn temporary cache.
 - **Không dùng chart library:** donut và weekly bar được viết bằng Canvas/CustomPainter, có animation và hit testing.
-- **Giới hạn môi trường:** Flutter/Dart CLI không có trong PATH nên chưa được phép khẳng định analyze/test/build pass; các bước còn lại được ghi rõ để chạy khi SDK sẵn sàng.
+- **Giới hạn môi trường:** đã cài Flutter 3.47.6/Dart 3.13.5, Android toolchain và xác minh `flutter analyze`, `flutter test`, `flutter build apk --release --target-platform android-arm64`. Chưa kiểm thử trực tiếp camera/OCR/SQLite persistence trên thiết bị thật vì chưa có Android device/emulator kết nối.

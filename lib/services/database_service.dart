@@ -9,7 +9,8 @@ class DatabaseService {
     if (_database != null) return _database!;
     final directory = await getApplicationDocumentsDirectory();
     final path = p.join(directory.path, 'receiptwise.db');
-    _database = await openDatabase(path, version: 1, onCreate: (db, version) async {
+    _database =
+        await openDatabase(path, version: 1, onCreate: (db, version) async {
       await db.execute('''
         CREATE TABLE expenses (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -25,8 +26,10 @@ class DatabaseService {
           updated_at TEXT NOT NULL
         )
       ''');
-      await db.execute('CREATE INDEX idx_expenses_date ON expenses(transaction_date)');
-      await db.execute('CREATE INDEX idx_expenses_category ON expenses(category)');
+      await db.execute(
+          'CREATE INDEX idx_expenses_date ON expenses(transaction_date)');
+      await db
+          .execute('CREATE INDEX idx_expenses_category ON expenses(category)');
     });
     return _database!;
   }

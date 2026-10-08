@@ -14,7 +14,8 @@ Future<void> main() async {
   final storage = FileStorageService();
   runApp(
     ChangeNotifierProvider(
-      create: (_) => ExpenseProvider(repository: repository, storage: storage)..load(),
+      create: (_) =>
+          ExpenseProvider(repository: repository, storage: storage)..load(),
       child: const ReceiptWiseApp(),
     ),
   );

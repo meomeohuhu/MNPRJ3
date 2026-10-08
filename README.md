@@ -41,6 +41,11 @@ flutter build apk --release
 ```
 
 APK sau khi build nằm tại `build/app/outputs/flutter-apk/app-release.apk`.
+Trong môi trường máy phát triển ít RAM, có thể dùng bản Android phổ biến arm64:
+
+```bash
+flutter build apk --release --target-platform android-arm64
+```
 
 ## Test OCR offline
 
@@ -54,7 +59,7 @@ Không có Firebase, cloud OCR, backend hay API key trong dự án.
 
 ## Render static site
 
-Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `render.yaml`. Demo live: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com). Link APK và Video vẫn để trạng thái chưa cấu hình vì chưa có release/video thực tế.
+Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `render.yaml`. Demo live: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com). Link APK GitHub Release và Video vẫn để trạng thái chưa cấu hình vì chưa upload release/quay video thực tế.
 
 ## Repository
 

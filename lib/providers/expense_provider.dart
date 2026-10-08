@@ -37,13 +37,16 @@ class ExpenseProvider extends ChangeNotifier {
       var value = expense;
       if (sourceImage != null) {
         final saved = await storage.saveReceipt(sourceImage);
-        value = expense.copyWith(receiptImagePath: saved.originalPath, receiptThumbnailPath: saved.thumbnailPath);
+        value = expense.copyWith(
+            receiptImagePath: saved.originalPath,
+            receiptThumbnailPath: saved.thumbnailPath);
       }
       if (value.id == null) {
         final id = await repository.insertExpense(value);
         value = value.copyWith(id: id);
       } else {
-        await repository.updateExpense(value.copyWith(updatedAt: DateTime.now()));
+        await repository
+            .updateExpense(value.copyWith(updatedAt: DateTime.now()));
       }
       await load();
       return true;
@@ -59,10 +62,13 @@ class ExpenseProvider extends ChangeNotifier {
     if (expense.id == null) return false;
     try {
       await repository.deleteExpense(expense.id!);
-      final remaining = expenses.where((item) => item.id != expense.id).toList();
-      final imagePaths = remaining.expand<String?>((item) => [item.receiptImagePath, item.receiptThumbnailPath]);
+      final remaining =
+          expenses.where((item) => item.id != expense.id).toList();
+      final imagePaths = remaining.expand<String?>(
+          (item) => [item.receiptImagePath, item.receiptThumbnailPath]);
       await storage.deleteIfUnreferenced(expense.receiptImagePath, imagePaths);
-      await storage.deleteIfUnreferenced(expense.receiptThumbnailPath, imagePaths);
+      await storage.deleteIfUnreferenced(
+          expense.receiptThumbnailPath, imagePaths);
       await load();
       return true;
     } catch (error) {
@@ -75,7 +81,9 @@ class ExpenseProvider extends ChangeNotifier {
   List<Expense> search(String query, {String? category}) {
     final needle = query.trim().toLowerCase();
     return expenses.where((item) {
-      final textMatch = needle.isEmpty || item.merchantName.toLowerCase().contains(needle) || (item.note ?? '').toLowerCase().contains(needle);
+      final textMatch = needle.isEmpty ||
+          item.merchantName.toLowerCase().contains(needle) ||
+          (item.note ?? '').toLowerCase().contains(needle);
       return textMatch && (category == null || item.category == category);
     }).toList();
   }
