@@ -58,7 +58,7 @@ Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `ren
 
 ## Repository
 
-ReceiptWise được upload tại branch [`receiptwise`](https://github.com/meomeohuhu/MNPRJ2/tree/receiptwise) của repository được cung cấp. Branch `main` hiện giữ project MNPRJ2 có sẵn và không bị ghi đè.
+ReceiptWise được upload tại repository [MNPRJ3](https://github.com/meomeohuhu/MNPRJ3). Branch `main` chứa source ReceiptWise.
 
 ## Tác giả
 

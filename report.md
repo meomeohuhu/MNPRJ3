@@ -10,7 +10,7 @@
 
 ReceiptWise là ứng dụng Flutter Android offline-first cho phép chụp/chọn hóa đơn, crop ảnh, nhận diện chữ bằng Google ML Kit on-device, phân tích total/date/merchant bằng Regex + heuristic, review trước khi lưu SQLite và xem analytics bằng CustomPainter.
 
-- Repository: [GitHub branch receiptwise](https://github.com/meomeohuhu/MNPRJ2/tree/receiptwise). Branch `main` của repository được giữ nguyên vì đang chứa project MNPRJ2 khác.
+- Repository: [GitHub MNPRJ3](https://github.com/meomeohuhu/MNPRJ3), branch `main` chứa source ReceiptWise.
 - APK: chưa build được trong môi trường hiện tại vì Flutter SDK chưa được cài/đưa vào PATH.
 - Render static site: source đã chuẩn bị tại `deploy/render-site`; có thể deploy từ branch `receiptwise` bằng `render.yaml`, chưa có public URL vì chưa có quyền kết nối Render.
 - Video: chưa quay; kịch bản thực tế tại `docs/video-script.md`.
