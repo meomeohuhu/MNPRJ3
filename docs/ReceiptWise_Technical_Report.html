@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>ReceiptWise - Technical Report</title>
+  <style>
+    @page { size: A4; margin: 16mm 17mm 15mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #172033; font-family: Arial, "Segoe UI", sans-serif; font-size: 10.2pt; line-height: 1.42; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1 { color: #243b9b; font-size: 25pt; line-height: 1.1; margin-bottom: 5px; }
+    h2 { color: #243b9b; font-size: 15pt; border-bottom: 1.5px solid #4f46e5; padding-bottom: 4px; margin: 0 0 10px; }
+    h3 { color: #374151; font-size: 11.5pt; margin: 12px 0 5px; }
+    .cover { border-left: 7px solid #4f46e5; padding: 8px 0 8px 15px; margin-bottom: 13px; }
+    .subtitle { color: #64748b; font-size: 12pt; margin: 0; }
+    .meta { display: grid; grid-template-columns: 125px 1fr; gap: 3px 12px; margin: 13px 0 16px; }
+    .meta b { color: #334155; }
+    .intro { background: #f5f7ff; border-radius: 7px; padding: 10px 12px; border: 1px solid #dbe2ff; }
+    table { width: 100%; border-collapse: collapse; margin: 7px 0 12px; }
+    th { background: #eef2ff; color: #243b9b; text-align: left; }
+    th, td { border: 1px solid #d8dee9; padding: 5px 6px; vertical-align: top; }
+    ul { margin: 5px 0 9px 18px; padding: 0; }
+    li { margin-bottom: 3px; }
+    a { color: #3730a3; text-decoration: underline; }
+    .small { color: #64748b; font-size: 9pt; }
+    .code { background: #f1f5f9; border-radius: 4px; padding: 7px 9px; font-family: Consolas, monospace; font-size: 8.5pt; white-space: pre-wrap; }
+    .pill { display: inline-block; background: #ecfdf5; color: #047857; border-radius: 10px; padding: 2px 7px; font-size: 8.5pt; font-weight: bold; }
+    .page { page-break-after: always; }
+    .page:last-child { page-break-after: auto; }
+    .footer { color: #94a3b8; border-top: 1px solid #e2e8f0; margin-top: 13px; padding-top: 5px; font-size: 8pt; }
+  </style>
+</head>
+<body>
+  <section class="page">
+    <div class="cover">
+      <h1>ReceiptWise</h1>
+      <p class="subtitle">Mini-Project 3 - OCR Expense Tracker &amp; Receipt Parser</p>
+    </div>
+    <div class="meta">
+      <b>Course</b><span>Cross-Platform Mobile App Development (VKU)</span>
+      <b>Student</b><span>Nguyễn Thành Thịnh</span>
+      <b>Student ID</b><span>23IT262</span>
+      <b>Submission Date</b><span>08/10/2026</span>
+    </div>
+
+    <h2>1. General Information &amp; Deliverable Links</h2>
+    <p class="intro">ReceiptWise là ứng dụng Flutter Android offline-first giúp chụp hoặc chọn hóa đơn, crop ảnh, nhận diện văn bản bằng Google ML Kit trên thiết bị, phân tích merchant/ngày/tổng tiền bằng Regex + heuristic, cho người dùng xác nhận rồi lưu giao dịch trong SQLite.</p>
+    <table>
+      <tr><th>Deliverable</th><th>Link / trạng thái</th></tr>
+      <tr><td>Live demo website</td><td><a href="https://receiptwise-demo.onrender.com">receiptwise-demo.onrender.com</a> <span class="pill">HTTP 200</span></td></tr>
+      <tr><td>APK cài trên mobile</td><td><a href="https://receiptwise-demo.onrender.com/downloads/ReceiptWise.apk">Download ReceiptWise.apk</a> - release arm64, SHA-256: <span class="small">FC296B24D070A55034FF80E6F7C927E9A886CEE3B50937B1B3EE27B069C8E6E2</span></td></tr>
+      <tr><td>GitHub repository</td><td><a href="https://github.com/meomeohuhu/MNPRJ3">github.com/meomeohuhu/MNPRJ3</a></td></tr>
+      <tr><td>Video demo</td><td>Chưa quay; kịch bản tại <span class="code">docs/video-script.md</span></td></tr>
+    </table>
+
+    <h2>2. Feature Implementation Checklist</h2>
+    <table>
+      <tr><th>Hạng mục</th><th>Trạng thái</th></tr>
+      <tr><td>Material 3, tiếng Việt, light/dark theme</td><td>Đã triển khai</td></tr>
+      <tr><td>Camera, flash, focus, gallery, crop</td><td>Đã triển khai; cropper activity và lifecycle đã xử lý</td></tr>
+      <tr><td>OCR offline ML Kit</td><td>Đã triển khai; có timeout và xử lý ảnh lớn</td></tr>
+      <tr><td>Regex/heuristic parser + review</td><td>Đã triển khai; hỗ trợ nhiều nhãn tổng và fallback cần xác nhận</td></tr>
+      <tr><td>SQLite CRUD và file persistence</td><td>Đã triển khai trong source</td></tr>
+      <tr><td>History, search, filter, detail</td><td>Đã triển khai</td></tr>
+      <tr><td>Donut/weekly chart</td><td>CustomPainter, animation và tap interaction</td></tr>
+      <tr><td>Static landing page + APK download</td><td>Đã deploy trên Render</td></tr>
+    </table>
+    <div class="footer">ReceiptWise - Nguyễn Thành Thịnh - 23IT262</div>
+  </section>
+
+  <section class="page">
+    <h2>3. Technical Architecture &amp; Project Structure</h2>
+    <p>Ứng dụng tách presentation, model, service, repository và provider. <b>ExpenseProvider</b> dùng ChangeNotifier điều phối trạng thái và refresh sau CRUD. <b>DatabaseService</b> quản lý SQLite version 1; <b>FileStorageService</b> lưu ảnh/thumbnails trong application documents. <b>OcrService</b> chỉ phụ trách ML Kit; <b>ReceiptParserService</b> là pure Dart để test độc lập; <b>AggregationService</b> gom dữ liệu theo tuần, tháng và danh mục.</p>
+    <div class="code">lib/
+├── app/                 # Material 3 theme và app shell
+├── core/                # constants, formatters, reusable widgets
+├── models/              # Expense, receipt parse result
+├── features/            # home, scanner, expenses, history, analytics
+├── services/            # OCR, parser, database, storage, aggregation
+├── repositories/        # SQLite repository
+├── providers/           # ExpenseProvider / ChangeNotifier
+└── main.dart</div>
+    <h3>Luồng xử lý chính</h3>
+    <p class="intro">Camera/Gallery → Crop thật → OcrService → ReceiptParserService → ReceiptReviewScreen → ExpenseProvider → SQLite + application documents → Dashboard/History/Analytics.</p>
+
+    <h3>Offline OCR và receipt parser</h3>
+    <ul>
+      <li>ML Kit chạy on-device, không Firebase, không cloud API, không yêu cầu internet sau khi model thiết bị sẵn sàng.</li>
+      <li>Chuẩn hóa Unicode/whitespace và dấu tiếng Việt trước khi phân tích.</li>
+      <li>Nhận các nhãn: <b>TỔNG</b>, <b>TỔNG CỘNG</b>, <b>TỔNG THANH TOÁN</b>, <b>TỔNG TIỀN</b>, <b>THÀNH TIỀN</b>, <b>TOTAL</b>, <b>AMOUNT DUE</b>.</li>
+      <li>Hỗ trợ `150.000đ`, `150,000 VND`, `150 000 VNĐ`, `1,300,000`; loại trừ VAT, giảm giá, tiền thừa và tổng số lượng.</li>
+      <li>Nếu OCR tách nhãn và số tiền thành hai dòng hoặc độ tin cậy thấp, parser vẫn điền candidate và đánh dấu trường cần người dùng kiểm tra.</li>
+    </ul>
+
+    <h3>Công nghệ và phiên bản xác minh</h3>
+    <p>Flutter 3.47.6, Dart 3.13.5, Material 3, Provider 6.1.5+1, sqflite 2.4.4+1, camera 0.11.4, image_picker 1.2.4, image_cropper 8.1.0, google_mlkit_text_recognition 0.15.1, path_provider 2.1.6 và intl 0.19.0.</p>
+    <div class="footer">ReceiptWise - Technical Architecture</div>
+  </section>
+
+  <section class="page">
+    <h2>4. Empirical Evidence &amp; Testing</h2>
+    <table>
+      <tr><th>Validation</th><th>Kết quả</th></tr>
+      <tr><td><span class="code">flutter pub get</span></td><td>Pass, dependencies resolved</td></tr>
+      <tr><td><span class="code">flutter analyze</span></td><td><span class="pill">No issues found</span></td></tr>
+      <tr><td><span class="code">flutter test</span></td><td><span class="pill">14 tests passed</span></td></tr>
+      <tr><td><span class="code">flutter build apk --debug --target-platform android-arm64</span></td><td>Pass; debug APK signed by Android debug keystore</td></tr>
+      <tr><td><span class="code">flutter build apk --release --target-platform android-arm64</span></td><td>Pass; release APK signed with environment-based keystore</td></tr>
+      <tr><td><span class="code">apksigner verify --verbose --print-certs</span></td><td>Debug/release: APK Signature Scheme v2, RSA 2048-bit, one signer</td></tr>
+      <tr><td>Render static site</td><td>Landing page và APK URL đã kiểm tra HTTP 200</td></tr>
+    </table>
+    <p><b>Test parser bill thực tế:</b> bill spa với `TỔNG: VND 1,300,000`, bill bán lẻ với `TỔNG TIỀN (VND): 188,350`, bill nhà hàng với `TỔNG CỘNG: 180,000`, ngày có kèm giờ, VAT, giảm giá, tiền thừa và ảnh có nhiều candidate.</p>
+    <p class="small"><b>Ảnh chụp màn hình:</b> chưa chèn ảnh giả. Môi trường build không có Android device/emulator kết nối để tạo screenshot thực tế; khi demo cần bổ sung Dashboard, Scanner, Review và Analytics từ thiết bị thật.</p>
+
+    <h2>5. Technical Challenges &amp; Resolutions</h2>
+    <table>
+      <tr><th>Thách thức</th><th>Giải pháp</th></tr>
+      <tr><td>APK không cài được do thiếu signature</td><td>Cấu hình debug signing mặc định, release signing qua environment variables và validation task.</td></tr>
+      <tr><td>App văng khi crop ảnh</td><td>Khai báo `UCropActivity`, xử lý camera lifecycle và bắt lỗi gallery/crop.</td></tr>
+      <tr><td>Locale data chưa khởi tạo</td><td>Gọi <span class="code">initializeDateFormatting('vi_VN')</span> trước <span class="code">runApp</span>.</td></tr>
+      <tr><td>Tiền bị trống hoặc OCR tách dòng</td><td>Đọc candidate ở dòng kề, hỗ trợ currency dính và fallback có cờ không chắc chắn để Review chỉnh sửa.</td></tr>
+      <tr><td>Ảnh quá lớn/OCR treo</td><td>Crop giới hạn 2200×3200, timeout 30 giây và báo lỗi rõ ràng.</td></tr>
+    </table>
+    <h3>Hướng dẫn nộp và demo</h3>
+    <ol>
+      <li>Mở live demo để giới thiệu sản phẩm: <a href="https://receiptwise-demo.onrender.com">receiptwise-demo.onrender.com</a>.</li>
+      <li>Tải APK từ <a href="https://receiptwise-demo.onrender.com/downloads/ReceiptWise.apk">link APK mobile</a>, cài trên Android và cấp quyền camera.</li>
+      <li>Demo một bill mỗi lần, crop sát bill, kiểm tra lại số tiền/ngày ở màn hình Review trước khi lưu.</li>
+      <li>Trình bày source tại <a href="https://github.com/meomeohuhu/MNPRJ3">GitHub repository</a>.</li>
+    </ol>
+    <div class="footer">ReceiptWise - Evidence, Challenges &amp; Submission Guide</div>
+  </section>
+</body>
+</html>

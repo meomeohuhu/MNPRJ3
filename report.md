@@ -13,6 +13,7 @@ ReceiptWise là ứng dụng Flutter Android offline-first cho phép chụp/ch�
 - Repository: [GitHub MNPRJ3](https://github.com/meomeohuhu/MNPRJ3), branch `main` chứa source ReceiptWise.
 - APK debug arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-debug.apk`, SHA-256 `D9C94FEDC316EF42BECCC63A0D2670318E20C8603181C1FF038C9ABB0AD42716`.
 - APK release arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-release.apk`, SHA-256 `FC296B24D070A55034FF80E6F7C927E9A886CEE3B50937B1B3EE27B069C8E6E2`. Cả hai APK đã được `apksigner verify --verbose --print-certs` xác nhận với APK Signature Scheme v2 và 1 signer RSA 2048-bit. Sau khi Render deploy commit này, APK có URL mobile: `https://receiptwise-demo.onrender.com/downloads/ReceiptWise.apk`.
+- Technical report PDF: `docs/ReceiptWise_Technical_Report.pdf`, bản public tại `https://receiptwise-demo.onrender.com/downloads/ReceiptWise_Technical_Report.pdf` sau khi Render deploy commit mới.
 - Render static site: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com), deploy từ branch `main` bằng `render.yaml`. Kiểm tra HTTP thực tế trả status 200 và title ReceiptWise.
 - Video: chưa quay; kịch bản thực tế tại `docs/video-script.md`.
 
