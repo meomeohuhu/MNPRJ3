@@ -143,18 +143,29 @@ class _ScannerScreenState extends State<ScannerScreen>
     if (!await source.exists()) {
       throw const FileSystemException('Ảnh đã chọn không tồn tại');
     }
-    final cropped =
-        await ImageCropper().cropImage(sourcePath: source.path, uiSettings: [
-      AndroidUiSettings(
-          toolbarTitle: 'Cắt hóa đơn',
-          toolbarColor: AppTheme.indigo,
-          toolbarWidgetColor: Colors.white,
-          lockAspectRatio: false),
-      IOSUiSettings(title: 'Cắt hóa đơn')
-    ]);
+    final cropped = await ImageCropper().cropImage(
+        sourcePath: source.path,
+        maxWidth: 2200,
+        maxHeight: 3200,
+        compressQuality: 92,
+        uiSettings: [
+          AndroidUiSettings(
+              toolbarTitle: 'Cắt hóa đơn',
+              toolbarColor: AppTheme.indigo,
+              toolbarWidgetColor: Colors.white,
+              lockAspectRatio: false),
+          IOSUiSettings(title: 'Cắt hóa đơn')
+        ]);
     if (cropped == null) return;
     final image = File(cropped.path);
-    final text = await ocr.recognizeText(image);
+    if (!await image.exists()) {
+      throw const FileSystemException('Ảnh sau khi cắt không tồn tại');
+    }
+    final text = await ocr.recognizeText(image).timeout(
+          const Duration(seconds: 30),
+          onTimeout: () => throw TimeoutException(
+              'OCR mất quá nhiều thời gian. Hãy crop sát một hóa đơn rồi thử lại.'),
+        );
     final result = parser.parse(text);
     if (!mounted) return;
     await Navigator.push(

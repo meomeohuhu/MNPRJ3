@@ -11,8 +11,8 @@
 ReceiptWise là ứng dụng Flutter Android offline-first cho phép chụp/chọn hóa đơn, crop ảnh, nhận diện chữ bằng Google ML Kit on-device, phân tích total/date/merchant bằng Regex + heuristic, review trước khi lưu SQLite và xem analytics bằng CustomPainter.
 
 - Repository: [GitHub MNPRJ3](https://github.com/meomeohuhu/MNPRJ3), branch `main` chứa source ReceiptWise.
-- APK debug arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-debug.apk` (134.5 MB), SHA-256 `DDE1CE4DD7CD52E9C95011740D9DEB2B987ED9D3752201735760EA3C9DBF8B19`.
-- APK release arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-release.apk` (54.1 MB), SHA-256 `8E4D580C59F76DD63830DD73841651F935A5EC64DFA995AAC7799D34671DA9B0`. Cả hai APK đã được `apksigner verify --verbose --print-certs` xác nhận với APK Signature Scheme v2 và 1 signer RSA 2048-bit. APK chưa upload GitHub Release vì chưa cấu hình GitHub CLI/token.
+- APK debug arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-debug.apk`, SHA-256 `ABDF6960CB7805F70E7B544E37F6B2E4995886B0D8CEEF022D24EBF3DCCF0FE6`.
+- APK release arm64: đã build thành công tại `build/app/outputs/flutter-apk/app-release.apk`, SHA-256 `5C3ECC1F7E5265D93C899343AE10B25640228D36A091DDF8451C159B4F27EC69`. Cả hai APK đã được `apksigner verify --verbose --print-certs` xác nhận với APK Signature Scheme v2 và 1 signer RSA 2048-bit. APK chưa upload GitHub Release vì chưa cấu hình GitHub CLI/token.
 - Render static site: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com), deploy từ branch `main` bằng `render.yaml`. Kiểm tra HTTP thực tế trả status 200 và title ReceiptWise.
 - Video: chưa quay; kịch bản thực tế tại `docs/video-script.md`.
 
@@ -41,10 +41,11 @@ Luồng chính: Camera/Gallery → Crop → OcrService → ReceiptParserService 
 
 ## 5. Technical Challenges & Resolutions
 
-- **OCR không ổn định theo chất lượng ảnh:** thêm crop thật, framing overlay, báo lỗi ảnh không có chữ và buộc review trước khi lưu.
+- **OCR không ổn định theo chất lượng ảnh:** thêm crop thật, giới hạn ảnh crop ở kích thước phù hợp, timeout 30 giây, báo lỗi ảnh không có chữ và buộc review trước khi lưu. Với nhiều bill trong một ảnh, người dùng nên crop từng bill.
 - **Nhiều số tiền trên hóa đơn:** parser chấm điểm keyword thanh toán, giảm điểm VAT/discount/change/unit price và đánh dấu `totalAmount` chưa chắc chắn khi candidate gần nhau.
 - **Dữ liệu phải tồn tại sau restart:** dùng SQLite và copy ảnh sang application documents, không giữ đường dẫn temporary cache.
 - **Không dùng chart library:** donut và weekly bar được viết bằng Canvas/CustomPainter, có animation và hit testing.
 - **Lỗi APK không có chữ ký:** cấu hình release trước đây không gán `signingConfig`, nên APK release cũ không có signature block và Android báo `APK contains no signature files`. Đã cấu hình debug signing mặc định và release signing qua biến môi trường, đồng thời thêm task validation để chặn release unsigned.
 - **Crash khi chụp/chọn ảnh:** `image_cropper` yêu cầu `com.yalantis.ucrop.UCropActivity` trong Android manifest; activity này bị thiếu nên cả hai luồng đều văng lúc mở màn hình crop. Đã khai báo activity với `@style/Ucrop.CropTheme` và gia cố xử lý lifecycle camera, gallery cancellation và lỗi native plugin.
+- **Bill có nhãn tổng khác nhau:** bổ sung heuristic cho `TỔNG:`, `TỔNG TIỀN`, `TỔNG TIỀN HÀNG`, `TỔNG CỘNG`, `TOTAL` và loại trừ `TỔNG SỐ LƯỢNG`; thêm test cho bill spa, bán lẻ và nhà hàng.
 - **Giới hạn môi trường:** đã cài Flutter 3.47.6/Dart 3.13.5, Android toolchain và xác minh `flutter clean`, `flutter pub get`, `flutter analyze`, `flutter test`, build debug/release và chữ ký APK. Chưa kiểm thử trực tiếp camera/OCR/SQLite persistence trên thiết bị thật vì chưa có Android device/emulator kết nối.

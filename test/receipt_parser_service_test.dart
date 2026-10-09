@@ -38,4 +38,25 @@ void main() {
     final result = parser.parse('SHOP\n31/02/2025\nTỔNG 150000đ');
     expect(result.transactionDate, isNull);
   });
+
+  test('parses payment receipt with standalone total label and time', () {
+    final result = parser.parse(
+        'SPA NA XINH\nNGÀY GIỜ: 28/02/2026 18:05:54\nTỔNG: VND 1,300,000');
+    expect(result.merchantName, 'SPA NA XINH');
+    expect(result.transactionDate, DateTime(2026, 2, 28));
+    expect(result.totalAmount, 1300000);
+  });
+
+  test('prefers total amount over quantity on retail bill', () {
+    final result = parser.parse(
+        'SIÊU THỊ MINH LOAN\nTỔNG SỐ LƯỢNG: 5,81\nTỔNG TIỀN HÀNG: 188,350\nTỔNG TIỀN (VND): 188,350');
+    expect(result.totalAmount, 188350);
+  });
+
+  test('parses small restaurant bill with total cộng', () {
+    final result = parser.parse('QUÁN KHÓI\nNgày: 13.04.24\nTổng cộng 180,000');
+    expect(result.merchantName, 'QUAN KHOI');
+    expect(result.transactionDate, DateTime(2024, 4, 13));
+    expect(result.totalAmount, 180000);
+  });
 }

@@ -4,12 +4,20 @@ class ReceiptParserService {
   static const _totalKeywords = <String>[
     'TONG THANH TOAN',
     'TONG CONG',
+    'TONG TIEN HANG',
+    'TONG TIEN (VND)',
+    'TONG TIEN',
     'THANH TIEN',
     'PHAI THANH TOAN',
     'SO TIEN THANH TOAN',
+    'PHIEU THANH TOAN',
     'GRAND TOTAL',
     'AMOUNT DUE',
+    'TOTAL AMOUNT',
+    'TOTAL DUE',
+    'THANH TOAN',
     'TOTAL',
+    'TONG',
   ];
 
   ReceiptParseResult parse(String rawText) {
@@ -35,6 +43,9 @@ class ReceiptParserService {
         final keywordIndex =
             _totalKeywords.indexWhere((keyword) => line.contains(keyword));
         if (keywordIndex >= 0) score += 100 - keywordIndex * 3;
+        if (line.contains('TONG SO LUONG') || line.contains('SO LUONG')) {
+          score -= 90;
+        }
         if (RegExp(
                 r'\b(VAT|THUE|TAX|GIAM GIA|DISCOUNT|TIEN THUA|CHANGE|TRA LAI)\b')
             .hasMatch(line)) {
@@ -203,7 +214,7 @@ class ReceiptParserService {
 
   String? _findMerchant(List<String> lines) {
     final ignored = RegExp(
-        r'(HOTLINE|TEL|DT|DIA CHI|ADDRESS|MST|TAX CODE|MA SO THUE|HÓA ĐƠN|HOA DON|INVOICE|NGAY|DATE|TOTAL|TONG|\d{5,})');
+        r'(HOTLINE|TEL|DT|DIA CHI|ADDRESS|MST|TAX CODE|MA SO THUE|HOA DON|INVOICE|PHIEU|NGAY|NGAY GIO|DATE|TOTAL|TONG|THANH TOAN|CAM KET|QUANG NAM|APP LABEL|TRACE|ARQC|AID|\d{5,}|^\d+\s)');
     for (final line in lines.take(10)) {
       final clean = line.replaceAll(RegExp(r'[^A-ZÀ-Ỹ0-9 &.\-]'), '').trim();
       if (clean.length < 3 ||
