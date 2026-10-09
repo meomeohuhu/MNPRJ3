@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:provider/provider.dart';
 
 import 'app/app.dart';
@@ -9,6 +10,7 @@ import 'services/file_storage_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await initializeDateFormatting('vi_VN');
   final database = DatabaseService();
   final repository = ExpenseRepository(database);
   final storage = FileStorageService();
