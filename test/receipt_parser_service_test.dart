@@ -59,4 +59,18 @@ void main() {
     expect(result.transactionDate, DateTime(2024, 4, 13));
     expect(result.totalAmount, 180000);
   });
+
+  test('parses amount when OCR separates total label and currency', () {
+    final result = parser.parse(
+        'SPA NA XINH\nTỔNG:\nVND1,300,000\nNGÀY GIỜ: 28/02/2026 18:05:54');
+    expect(result.totalAmount, 1300000);
+    expect(result.transactionDate, DateTime(2026, 2, 28));
+  });
+
+  test('shows a low-confidence fallback amount instead of leaving it blank',
+      () {
+    final result = parser.parse('CỬA HÀNG\nSỮA 25.000\nBÁNH 15.000\n180.000');
+    expect(result.totalAmount, 180000);
+    expect(result.uncertainFields, contains('totalAmount'));
+  });
 }

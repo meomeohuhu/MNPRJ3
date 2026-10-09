@@ -40,9 +40,20 @@ class ReceiptParserService {
       final amounts = _amountsIn(line);
       for (final amount in amounts) {
         var score = 10 - (index.clamp(0, 8));
-        final keywordIndex =
-            _totalKeywords.indexWhere((keyword) => line.contains(keyword));
+        final keywordIndex = _keywordIndex(line);
         if (keywordIndex >= 0) score += 100 - keywordIndex * 3;
+        if (keywordIndex < 0 && index > 0) {
+          final previousKeywordIndex = _keywordIndex(lines[index - 1]);
+          if (previousKeywordIndex >= 0) {
+            score += 85 - previousKeywordIndex * 3;
+          }
+        }
+        if (keywordIndex < 0 && index + 1 < lines.length) {
+          final nextKeywordIndex = _keywordIndex(lines[index + 1]);
+          if (nextKeywordIndex >= 0) {
+            score += 70 - nextKeywordIndex * 3;
+          }
+        }
         if (line.contains('TONG SO LUONG') || line.contains('SO LUONG')) {
           score -= 90;
         }
@@ -66,10 +77,21 @@ class ReceiptParserService {
       }
     }
     final best = candidates.where((item) => item.score > 15).toList();
-    final selected = best.isEmpty ? null : best.first;
+    var selected = best.isEmpty ? null : best.first;
     final uncertain = <String>[];
     if (selected == null) {
-      uncertain.add('totalAmount');
+      final fallback = candidates
+          .where((candidate) =>
+              candidate.amount >= 1000 &&
+              !_looksLikeIdentifier(lines[candidate.lineIndex]))
+          .toList();
+      if (fallback.isNotEmpty) {
+        fallback.sort((a, b) => a.lineIndex.compareTo(b.lineIndex));
+        selected = fallback.last;
+        uncertain.add('totalAmount');
+      } else {
+        uncertain.add('totalAmount');
+      }
     } else if (best.length > 1 &&
         (best[1].score == selected.score ||
             (selected.amount - best[1].amount).abs() <=
@@ -89,6 +111,13 @@ class ReceiptParserService {
       uncertainFields: uncertain,
     );
   }
+
+  int _keywordIndex(String line) =>
+      _totalKeywords.indexWhere((keyword) => line.contains(keyword));
+
+  bool _looksLikeIdentifier(String line) => RegExp(
+          r'(NGAY|DATE|SO HOA DON|HOA DON|TID|MID|TRACE|ARQC|AID|THAM CHIEU|CHUAN CHI|HOTLINE|TEL|LO:)')
+      .hasMatch(line);
 
   String _normalize(String value) => value
       .replaceAll('\r', '\n')
@@ -176,8 +205,7 @@ class ReceiptParserService {
   }
 
   List<int> _amountsIn(String line) {
-    final matches =
-        RegExp(r'(?<![A-Z])\d[\d., ]{0,18}\d|(?<![A-Z])\d+').allMatches(line);
+    final matches = RegExp(r'\d[\d., ]{0,18}\d|\d+').allMatches(line);
     return matches
         .map((match) => _toVnd(match.group(0)!))
         .where((amount) => amount > 0)
