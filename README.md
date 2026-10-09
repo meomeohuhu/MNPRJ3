@@ -76,7 +76,7 @@ Không có Firebase, cloud OCR, backend hay API key trong dự án.
 
 ## Render static site
 
-Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `render.yaml`. Demo live: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com). Link APK GitHub Release và Video vẫn để trạng thái chưa cấu hình vì chưa upload release/quay video thực tế.
+Landing page nằm tại `deploy/render-site`. Cấu hình Render nằm ở `render.yaml`. Demo live: [receiptwise-demo.onrender.com](https://receiptwise-demo.onrender.com). APK release có thể tải trực tiếp trên mobile tại [Download ReceiptWise.apk](https://receiptwise-demo.onrender.com/downloads/ReceiptWise.apk). Video demo chưa có.
 
 ## Repository
 
